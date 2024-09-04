@@ -1,9 +1,13 @@
 const User = require("../models/user.model");
 const Counter = require("../models/uniqueid.model");
+const Supergrade = require("../models/supergrade.model");
+const Upgrade = require("../models/upgrade.model");
+const Restrint = require("../models/restrint.model");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+
 //////////////////////////////////////////////////////// generate unique id ///////////////////////////////////////////////////////////////////
 const generateUniqueId = async () => {
   const counter = await Counter.findOneAndUpdate(
@@ -27,7 +31,7 @@ const createUser = async (req, res) => {
     // Generate a unique ID for the user
     const uniqueId = await generateUniqueId();
 
-    // Create a new user instance without the token initially
+    // Create a new user instance
     const newUser = new User({
       name,
       gender,
@@ -56,11 +60,52 @@ const createUser = async (req, res) => {
     newUser.userToken = token;
 
     // Save the user with the token
-    await newUser.save();
+    const savedUser = await newUser.save();
+    //////////////////////////////////////////////////upadet userid to Supergrade /////////////////////////////////////////////////////
+    const supergrade = await Supergrade.findOne();
+    if (supergrade) {
+      // Push the userId to the existing SUPRUPGRADE array
+      supergrade.SUPRUPGRADE.push({ userId: savedUser._id });
+      await supergrade.save();
+    } else {
+      // If no Supergrade document exists, create one and push the userId
+      const newSupergrade = new Supergrade({
+        SUPRUPGRADE: [{ userId: savedUser._id }],
+      });
+      await newSupergrade.save();
+    }
 
+    //////////////////////////////////////////////////// update userId //////////////////////////////////////////////////////////////
+    const upgrade = await Upgrade.findOne();
+    if (supergrade) {
+      // Push the userId to the existing SUPRUPGRADE array
+      upgrade.ENHANCEMENT.push({ userId: savedUser._id });
+      await upgrade.save();
+    } else {
+      // If no Supergrade document exists, create one and push the userId
+      const newUpgrade = new Upgrade({
+        ENHANCEMENT: [{ userId: savedUser._id }],
+      });
+      await newUpgrade.save();
+    }
+    //////////////////////////////////////////////////// update userId //////////////////////////////////////////////////////////////
+    const restrint = await Restrint.findOne();
+    if (supergrade) {
+      // Push the userId to the existing SUPRUPGRADE array
+      restrint.RESTRAINTS.push({ userId: savedUser._id });
+      await restrint.save();
+    } else {
+      // If no Supergrade document exists, create one and push the userId
+      const newRestrint = new Restrint({
+        RESTRAINTS: [{ userId: savedUser._id }],
+      });
+      await newRestrint.save();
+    }
+
+    // Respond with success
     res.status(201).json({
-      message: "User created successfully",
-      user: newUser,
+      message: "User created successfully and userId added to Supergrade",
+      user: savedUser,
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -226,5 +271,5 @@ module.exports = {
   updateUserById,
   updateCoin,
   increaseCoinsPerMinute,
-  updateCoinsEarnToday
+  updateCoinsEarnToday,
 };

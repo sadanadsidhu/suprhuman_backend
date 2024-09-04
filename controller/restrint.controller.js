@@ -100,19 +100,53 @@ const updateRestrint = async (req, res) => {
       return res.status(404).json({ error: "Restrint not found" });
     }
 
-    // Find the specific restrint by its _id within the RESTRAINTS array
-    const restrintItem = restrint.RESTRAINTS.id(restrintId);
+    // Find the specific restrint item by its _id within the RESTRAINTS array
+    const restrintItem = restrint.RESTRAINTS.find(
+      (item) => item._id.toString() === restrintId
+    );
 
     if (!restrintItem) {
       return res.status(404).json({ error: "Restrint item not found" });
     }
 
+    // Extract userId from the last item in the RESTRAINTS array
+    const userId = restrint.RESTRAINTS.find((item) => item.userId)?.userId;
+
+    // Check if userId exists
+    if (!userId) {
+      return res.status(404).json({ error: "User ID not found in restrint" });
+    }
+
+    // Find the user associated with this restrint
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Calculate the cost
+    const costNumeric = parseFloat(restrintItem.cost.replace(/k/i, "")) * 1000; // Convert cost to a numeric value (e.g., 3k -> 3000)
+
+    // Calculate the new coinMin value
+    const newCoinMin = restrintItem.coinMin + restrintItem.coinMin * 0.2;
+
+    // Check if the user has enough signupCoin to cover the cost and the new coinMin
+    if (user.signupCoin < newCoinMin) {
+      return res
+        .status(400)
+        .json({ error: "Insufficient signupCoin to upgrade restrint" });
+    }
+
+    // Deduct the new coinMin from the user's signupCoin
+    user.signupCoin -= newCoinMin;
+
     // Update the restrint fields
     restrintItem.level += 1;
-    restrintItem.cost = parseFloat(restrintItem.cost.replace(/k/i, "")) * 2 + "k"; // Doubling the cost
-    restrintItem.coinMin += restrintItem.coinMin * 0.2;
+    restrintItem.cost = (costNumeric * 2) / 1000 + "k"; // Doubling the cost and converting back to 'k' format
+    restrintItem.coinMin = newCoinMin;
 
-    // Save the updated restrint document to the database
+    // Save the updated user and Restrint documents to the database
+    await user.save();
     const savedRestrint = await restrint.save();
 
     // Send a success response
@@ -122,9 +156,10 @@ const updateRestrint = async (req, res) => {
     res.status(500).json({ error: "Failed to update restrint" });
   }
 };
+
 module.exports = {
   createRestrint,
   getAllRestrint,
   updateCoinsPerMinute,
-  updateRestrint
+  updateRestrint,
 };

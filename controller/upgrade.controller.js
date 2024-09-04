@@ -64,7 +64,7 @@ const updateUpgrade = async (req, res) => {
       return res.status(400).json({ error: "Invalid ID format" });
     }
 
-    // Find the upgrade document by its _id
+    // Find the Upgrade document by its _id
     const upgrade = await Upgrade.findById(_id);
 
     if (!upgrade) {
@@ -72,25 +72,30 @@ const updateUpgrade = async (req, res) => {
     }
 
     // Find the specific enhancement by its _id within the ENHANCEMENT array
-    const enhancement = upgrade.ENHANCEMENT.id(enhancementId);
+    const enhancement = upgrade.ENHANCEMENT.find(
+      (item) => item._id.toString() === enhancementId
+    );
 
     if (!enhancement) {
       return res.status(404).json({ error: "Enhancement not found" });
     }
 
+    // Calculate the cost
+    const costNumeric = parseFloat(enhancement.cost.replace(/k/i, "")) * 1000; // Convert cost to a numeric value (e.g., 3k -> 3000)
+
     // Update the enhancement fields
     enhancement.level += 1;
-    enhancement.cost = parseFloat(enhancement.cost.replace(/k/i, "")) * 2 + "k"; // Doubling the cost
+    enhancement.cost = (costNumeric * 2) / 1000 + "k"; // Doubling the cost and converting back to 'k' format
     enhancement.coinMin += enhancement.coinMin * 0.2;
 
-    // Save the updated upgrade document to the database
+    // Save the updated Upgrade document to the database
     const savedUpgrade = await upgrade.save();
 
     // Send a success response
     res.status(200).json(savedUpgrade);
   } catch (error) {
-    console.error("Error updating upgrade:", error);
-    res.status(500).json({ error: "Failed to update upgrade" });
+    console.error("Error updating enhancement:", error);
+    res.status(500).json({ error: "Failed to update enhancement" });
   }
 };
 

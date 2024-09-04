@@ -7,27 +7,27 @@ const superUpgradeSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
+    required: false,
   },
   level: {
     type: Number,
-    required: true,
+    required: false,
   },
   cost: {
     type: String,
-    required: true,
+    required: false,
   },
   coinMin: {
     type: Number,
-    required: true,
+    required: false,
   },
   icon: {
     type: String,
-    required: true,
+    required: false,
   },
   quote: {
     type: String,
-    required: true,
+    required: false,
   },
 });
 

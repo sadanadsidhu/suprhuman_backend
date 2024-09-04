@@ -1,4 +1,5 @@
 const Supergrade = require("../models/supergrade.model");
+const User = require("../models/user.model");
 const mongoose = require("mongoose");
 
 const createSupergrade = async (req, res) => {
@@ -73,18 +74,50 @@ const updateSuperGrade = async (req, res) => {
     }
 
     // Find the specific supergrade item by its _id within the SUPRUPGRADE array
-    const supergradeItem = supergrade.SUPRUPGRADE.id(supergradeId);
+    const supergradeItem = supergrade.SUPRUPGRADE.find(
+      (item) => item._id.toString() === supergradeId
+    );
 
     if (!supergradeItem) {
       return res.status(404).json({ error: "Supergrade item not found" });
     }
 
+    // Extract userId from the last item in the SUPRUPGRADE array
+    const userId = supergrade.SUPRUPGRADE.find((item) => item.userId)?.userId;
+
+    // Check if userId exists
+    if (!userId) {
+      return res.status(404).json({ error: "User ID not found in supergrade" });
+    }
+
+    // Find the user associated with this supergrade
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Calculate the cost
+    const costNumeric =
+      parseFloat(supergradeItem.cost.replace(/k/i, "")) * 1000; // Convert cost to a numeric value (e.g., 3k -> 3000)
+
+    // Check if the user has enough signupCoin to cover the cost
+    if (user.signupCoin < costNumeric) {
+      return res
+        .status(400)
+        .json({ error: "Insufficient signupCoin to upgrade supergrade" });
+    }
+
+    // Deduct the cost from the user's signupCoin
+    user.signupCoin -= costNumeric;
+
     // Update the supergrade fields
     supergradeItem.level += 1;
-    supergradeItem.cost = parseFloat(supergradeItem.cost.replace(/k/i, "")) * 2 + "k"; // Doubling the cost
+    supergradeItem.cost = (costNumeric * 2) / 1000 + "k"; // Doubling the cost and converting back to 'k' format
     supergradeItem.coinMin += supergradeItem.coinMin * 0.2;
 
-    // Save the updated Supergrade document to the database
+    // Save the updated user and Supergrade documents to the database
+    await user.save();
     const savedSupergrade = await supergrade.save();
 
     // Send a success response
@@ -94,8 +127,9 @@ const updateSuperGrade = async (req, res) => {
     res.status(500).json({ error: "Failed to update supergrade" });
   }
 };
+
 module.exports = {
   createSupergrade,
   getAllSupergrades,
-  updateSuperGrade
+  updateSuperGrade,
 };

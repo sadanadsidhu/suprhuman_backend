@@ -12,7 +12,7 @@ mongoose
   .catch((err) => console.log("Database is not working"));
 
 const corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: ["http://88.222.242.108"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
