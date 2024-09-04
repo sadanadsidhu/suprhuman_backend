@@ -38,11 +38,16 @@ const userSchema = new mongoose.Schema({
   },
   level: {
     type: Number,
-    default: 0,
+    default: 1,
   },
   coinsPerMinute: {
     type: Number,
-    default: 10,
+    default: 0,
+    set: (value) => Math.floor(value),
+  },
+  coinsEarnToday: {
+    type: Number,
+    default: 0,
   },
   energy: {
     current: {

@@ -12,14 +12,15 @@ mongoose
   .catch((err) => console.log("Database is not working"));
 
 const corsOptions = {
-  origin: "*", // Allow all origins. For security, specify allowed origins.
+  origin: ["http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true, // Set to true if you need to send cookies or authentication headers
+  credentials: true,
 };
 
-// Use CORS middleware
 app.use(cors(corsOptions));
+
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use(cookieParser());
@@ -27,6 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/", require("./routes/user.routes"));
 app.use("/", require("./routes/upgrade.routes"));
+app.use("/", require("./routes/restrint.routes"));
+app.use("/", require("./routes/supergrade.routes"));
 
 app.listen(process.env.PORT, () =>
   console.log(`Server is running on port ${process.env.PORT}`)

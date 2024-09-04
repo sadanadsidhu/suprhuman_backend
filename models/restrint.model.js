@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const enhancementSchema = new mongoose.Schema({
+const restrintSchema = new mongoose.Schema({
   userId: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: "User",
@@ -20,7 +20,6 @@ const enhancementSchema = new mongoose.Schema({
   coinMin: {
     type: Number,
     required: true,
-    set: (value) => Math.floor(value),
   },
   icon: {
     type: String,
@@ -33,7 +32,7 @@ const enhancementSchema = new mongoose.Schema({
 });
 
 const upgradeSchema = new mongoose.Schema({
-  ENHANCEMENT: [enhancementSchema],
+  RESTRAINTS: [restrintSchema],
 });
 
-module.exports = mongoose.model("Upgrade", upgradeSchema);
+module.exports = mongoose.model("Restrint", upgradeSchema);

@@ -169,27 +169,62 @@ const increaseCoinsPerMinute = async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     user.energy.coinsPerMinute += incrementValue;
     await user.save();
 
     res.status(200).json({
-      message: 'Coins per minute updated successfully',
+      message: "Coins per minute updated successfully",
       updatedUser: user,
     });
   } catch (error) {
-    console.error('Error updating coinsPerMinute:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    console.error("Error updating coinsPerMinute:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
-}
+};
+const updateCoinsEarnToday = async (req, res) => {
+  try {
+    const { userId } = req.params; // Extract userId from request parameters
 
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
+
+    // Find the user by _id
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update coinsEarnToday by adding coinsPerMinute
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $inc: { coinsEarnToday: user.coinsPerMinute },
+      },
+      { new: true } // Return the updated document
+    );
+
+    res.status(200).json({
+      message: "coinsEarnToday updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating coinsEarnToday:", error);
+    res.status(500).json({ error: "Failed to update coinsEarnToday" });
+  }
+};
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
   updateUserById,
   updateCoin,
-  increaseCoinsPerMinute
+  increaseCoinsPerMinute,
+  updateCoinsEarnToday
 };
