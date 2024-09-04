@@ -43,7 +43,6 @@ const userSchema = new mongoose.Schema({
   coinsPerMinute: {
     type: Number,
     default: 0,
-    set: (value) => Math.floor(value),
   },
   coinsEarnToday: {
     type: Number,

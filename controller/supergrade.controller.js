@@ -53,7 +53,49 @@ const getAllSupergrades = async (req, res) => {
   }
 };
 
+const updateSuperGrade = async (req, res) => {
+  try {
+    const { _id, supergradeId } = req.params;
+
+    // Validate the parameters
+    if (
+      !mongoose.Types.ObjectId.isValid(_id) ||
+      !mongoose.Types.ObjectId.isValid(supergradeId)
+    ) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    // Find the Supergrade document by its _id
+    const supergrade = await Supergrade.findById(_id);
+
+    if (!supergrade) {
+      return res.status(404).json({ error: "Supergrade not found" });
+    }
+
+    // Find the specific supergrade item by its _id within the SUPRUPGRADE array
+    const supergradeItem = supergrade.SUPRUPGRADE.id(supergradeId);
+
+    if (!supergradeItem) {
+      return res.status(404).json({ error: "Supergrade item not found" });
+    }
+
+    // Update the supergrade fields
+    supergradeItem.level += 1;
+    supergradeItem.cost = parseFloat(supergradeItem.cost.replace(/k/i, "")) * 2 + "k"; // Doubling the cost
+    supergradeItem.coinMin += supergradeItem.coinMin * 0.2;
+
+    // Save the updated Supergrade document to the database
+    const savedSupergrade = await supergrade.save();
+
+    // Send a success response
+    res.status(200).json(savedSupergrade);
+  } catch (error) {
+    console.error("Error updating supergrade:", error);
+    res.status(500).json({ error: "Failed to update supergrade" });
+  }
+};
 module.exports = {
   createSupergrade,
   getAllSupergrades,
+  updateSuperGrade
 };

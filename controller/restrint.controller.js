@@ -81,8 +81,50 @@ const updateCoinsPerMinute = async (req, res) => {
   }
 };
 
+const updateRestrint = async (req, res) => {
+  try {
+    const { _id, restrintId } = req.params;
+
+    // Validate the parameters
+    if (
+      !mongoose.Types.ObjectId.isValid(_id) ||
+      !mongoose.Types.ObjectId.isValid(restrintId)
+    ) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    // Find the Restrint document by its _id
+    const restrint = await Restrint.findById(_id);
+
+    if (!restrint) {
+      return res.status(404).json({ error: "Restrint not found" });
+    }
+
+    // Find the specific restrint by its _id within the RESTRAINTS array
+    const restrintItem = restrint.RESTRAINTS.id(restrintId);
+
+    if (!restrintItem) {
+      return res.status(404).json({ error: "Restrint item not found" });
+    }
+
+    // Update the restrint fields
+    restrintItem.level += 1;
+    restrintItem.cost = parseFloat(restrintItem.cost.replace(/k/i, "")) * 2 + "k"; // Doubling the cost
+    restrintItem.coinMin += restrintItem.coinMin * 0.2;
+
+    // Save the updated restrint document to the database
+    const savedRestrint = await restrint.save();
+
+    // Send a success response
+    res.status(200).json(savedRestrint);
+  } catch (error) {
+    console.error("Error updating restrint:", error);
+    res.status(500).json({ error: "Failed to update restrint" });
+  }
+};
 module.exports = {
   createRestrint,
   getAllRestrint,
   updateCoinsPerMinute,
+  updateRestrint
 };
