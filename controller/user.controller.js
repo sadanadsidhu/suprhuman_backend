@@ -61,48 +61,7 @@ const createUser = async (req, res) => {
 
     // Save the user with the token
     const savedUser = await newUser.save();
-    //////////////////////////////////////////////////upadet userid to Supergrade /////////////////////////////////////////////////////
-    const supergrade = await Supergrade.findOne();
-    if (supergrade) {
-      // Push the userId to the existing SUPRUPGRADE array
-      supergrade.SUPRUPGRADE.push({ userId: savedUser._id });
-      await supergrade.save();
-    } else {
-      // If no Supergrade document exists, create one and push the userId
-      const newSupergrade = new Supergrade({
-        SUPRUPGRADE: [{ userId: savedUser._id }],
-      });
-      await newSupergrade.save();
-    }
 
-    //////////////////////////////////////////////////// update userId //////////////////////////////////////////////////////////////
-    const upgrade = await Upgrade.findOne();
-    if (supergrade) {
-      // Push the userId to the existing SUPRUPGRADE array
-      upgrade.ENHANCEMENT.push({ userId: savedUser._id });
-      await upgrade.save();
-    } else {
-      // If no Supergrade document exists, create one and push the userId
-      const newUpgrade = new Upgrade({
-        ENHANCEMENT: [{ userId: savedUser._id }],
-      });
-      await newUpgrade.save();
-    }
-    //////////////////////////////////////////////////// update userId //////////////////////////////////////////////////////////////
-    const restrint = await Restrint.findOne();
-    if (supergrade) {
-      // Push the userId to the existing SUPRUPGRADE array
-      restrint.RESTRAINTS.push({ userId: savedUser._id });
-      await restrint.save();
-    } else {
-      // If no Supergrade document exists, create one and push the userId
-      const newRestrint = new Restrint({
-        RESTRAINTS: [{ userId: savedUser._id }],
-      });
-      await newRestrint.save();
-    }
-
-    // Respond with success
     res.status(201).json({
       message: "User created successfully and userId added to Supergrade",
       user: savedUser,
