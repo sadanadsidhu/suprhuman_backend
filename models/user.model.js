@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -22,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   signupCoin: {
     type: Number,
-    require: false,
+    required: false,
   },
   userToken: {
     type: String,
@@ -53,12 +54,37 @@ const userSchema = new mongoose.Schema({
       type: Number,
       default: 1000,
     },
-
     max: {
       type: Number,
       default: 1000,
     },
   },
 });
+
+// Virtual property to format coinsPerMinute
+userSchema.virtual("formattedCoinsPerMinute").get(function () {
+  return formatNumber(this.coinsPerMinute);
+});
+
+// Virtual property to format signupCoin
+userSchema.virtual("formattedSignupCoin").get(function () {
+  return formatNumberWithCommas(this.signupCoin);
+});
+
+// Function to format numbers with thousands separators
+function formatNumberWithCommas(num) {
+  if (num === null || num === undefined) return "0";
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Function to format numbers with 'k' and 'M'
+function formatNumber(num) {
+  if (num >= 1e6) {
+    return (num / 1e6).toFixed(1) + "M";
+  } else if (num >= 1e3) {
+    return (num / 1e3).toFixed(1) + "k";
+  }
+  return num.toString();
+}
 
 module.exports = mongoose.model("User", userSchema);

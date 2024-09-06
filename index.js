@@ -14,7 +14,7 @@ mongoose
 
 // Define CORS options
 const corsOptions = {
-  origin: "http://www.suprhuman.tech", // Make sure this matches the origin of your requests
+  origin: "http://localhost:3000", // Make sure this matches the origin of your requests
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

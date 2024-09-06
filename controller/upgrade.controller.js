@@ -85,7 +85,7 @@ const updateUpgrade = async (req, res) => {
 
     // Update the enhancement fields
     enhancement.level += 1;
-    enhancement.cost = (costNumeric * 2) / 1000 + "k"; // Doubling the cost and converting back to 'k' format
+    enhancement.cost = ((costNumeric * 2) / 1000).toFixed(1) + "k"; // Doubling the cost and converting back to 'k' format
     enhancement.coinMin += enhancement.coinMin * 0.2;
 
     // Save the updated Upgrade document to the database

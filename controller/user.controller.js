@@ -246,11 +246,18 @@ const updateCoinsEarnToday = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    // Ensure coinsPerMinute exists and is a number
+    const coinsPerMinute = user.coinsPerMinute;
+
+    if (typeof coinsPerMinute !== "number") {
+      return res.status(400).json({ error: "Invalid coinsPerMinute value" });
+    }
+
     // Update coinsEarnToday by adding coinsPerMinute
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
-        $inc: { coinsEarnToday: user.coinsPerMinute },
+        $inc: { coinsEarnToday: coinsPerMinute }, // Increment the coinsEarnToday field
       },
       { new: true } // Return the updated document
     );

@@ -102,7 +102,7 @@ const updateSuperGrade = async (req, res) => {
       parseFloat(supergradeItem.cost.replace(/k/i, "")) * 1000; // Convert cost to a numeric value (e.g., 3k -> 3000)
 
     // Check if the user has enough signupCoin to cover the cost
-    if (user.signupCoin < costNumeric) {
+    if (user.signupCoin > costNumeric) {
       return res
         .status(400)
         .json({ error: "Insufficient signupCoin to upgrade supergrade" });
